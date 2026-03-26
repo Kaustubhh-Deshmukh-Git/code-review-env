@@ -1,0 +1,179 @@
+version: "1.0"
+name: "code-review"
+title: "Code Review Environment"
+description: "An OpenEnv environment for training AI agents to review code and identify bugs, security vulnerabilities, and style issues."
+
+author:
+  name: "Kaustubh Deshmukh & Priyada Patil"
+  email: "kaustubh.d365@gmail.com"
+
+tags:
+  - "code-review"
+  - "real-world"
+  - "software-engineering"
+  - "bug-detection"
+  - "security"
+
+action_schema:
+  type: object
+  properties:
+    action_type:
+      type: string
+      enum:
+        - "report_bug"
+        - "request_change"
+        - "approve"
+        - "skip_line"
+      description: "Type of action the agent is taking"
+    line_number:
+      type: integer
+      description: "Line number in code (0-indexed, required for report_bug)"
+    bug_description:
+      type: string
+      description: "Description of the bug found"
+    severity:
+      type: string
+      enum:
+        - "critical"
+        - "high"
+        - "medium"
+        - "low"
+      description: "Severity level of the reported bug"
+    suggestion:
+      type: string
+      description: "Suggested fix or improvement"
+  required:
+    - "action_type"
+
+observation_schema:
+  type: object
+  properties:
+    code_lines:
+      type: array
+      items:
+        type: string
+      description: "List of code lines with line numbers"
+    current_line:
+      type: integer
+      description: "Current line number being reviewed"
+    bugs_found_so_far:
+      type: object
+      description: "Dictionary of bugs found so far (line -> bug info)"
+    available_actions:
+      type: array
+      items:
+        type: string
+      description: "List of available actions"
+    episode_progress:
+      type: number
+      minimum: 0.0
+      maximum: 1.0
+      description: "Progress through episode (0.0-1.0)"
+    task_type:
+      type: string
+      enum:
+        - "easy"
+        - "medium"
+        - "hard"
+      description: "Current task difficulty"
+    code_summary:
+      type: string
+      description: "Brief description of what the code does"
+
+reward_schema:
+  type: object
+  properties:
+    score:
+      type: number
+      minimum: 0.0
+      maximum: 1.0
+      description: "Partial reward for this step"
+    partial_progress:
+      type: number
+      minimum: 0.0
+      maximum: 1.0
+      description: "Progress towards task completion"
+    done:
+      type: boolean
+      description: "Whether episode is complete"
+    info:
+      type: object
+      description: "Additional information about this step"
+
+tasks:
+  - id: "easy"
+    name: "Syntax Error Detection"
+    description: "Detect obvious syntax errors in Python code"
+    difficulty: 1
+    max_steps: 30
+    expected_score_range: [0.0, 1.0]
+    grader: "EasyGrader"
+    success_criteria: >
+      Successfully identify all syntax errors (missing colons, unclosed parentheses, etc.)
+      with minimal false positives.
+
+  - id: "medium"
+    name: "Style & Performance Review"
+    description: "Identify style violations and performance issues in code"
+    difficulty: 2
+    max_steps: 50
+    expected_score_range: [0.0, 1.0]
+    grader: "MediumGrader"
+    success_criteria: >
+      Identify code style issues and performance problems, correctly classifying severity.
+      Examples: incorrect None checks, inefficient loops, missing error handling.
+
+  - id: "hard"
+    name: "Security Vulnerability Detection"
+    description: "Identify critical security vulnerabilities and design flaws"
+    difficulty: 3
+    max_steps: 80
+    expected_score_range: [0.0, 1.0]
+    grader: "HardGrader"
+    success_criteria: >
+      Find security vulnerabilities (SQL injection, unsafe global state, input validation issues)
+      and design flaws. Minimize false positives on complex code.
+
+reward_function:
+  type: "partial_progress"
+  description: >
+    Rewards are given throughout the episode for correct bug reports.
+    - Correct bug report: +0.30
+    - Correct severity classification: +0.10
+    - Incorrect bug report (false positive): -0.15
+    - Final score based on precision/recall or weighted F1 depending on task
+  
+  signal_timing: "continuous"
+  sparsity: "medium"
+
+episode_config:
+  max_steps: 100
+  episode_boundaries: "fixed"
+  reset_behavior: "deterministic"
+  state_space:
+    type: "continuous"
+    dimensions: "variable"
+  action_space:
+    type: "discrete"
+    size: 4
+
+environment_info:
+  python_version: "3.9+"
+  framework: "pydantic"
+  dependencies:
+    - pydantic
+    - openai
+    - flask
+  
+  api_endpoints:
+    - "/reset"
+    - "/step"
+    - "/state"
+    - "/baseline"
+    - "/grader"
+    - "/tasks"
+
+validation:
+  schema_validation: true
+  determinism: true
+  reproducibility: true
