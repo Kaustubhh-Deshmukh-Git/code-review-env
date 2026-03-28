@@ -1,159 +1,72 @@
 version: "1.0"
 name: "code-review"
-title: "Code Review Environment"
-description: "An OpenEnv environment for training AI agents to review code and identify bugs, security vulnerabilities, and style issues."
-
-author:
-  name: "Kaustubh Deshmukh & Priyada Patil"
-  email: "kaustubhd365@gmail.com"
-
-tags:
-  - "code-review"
-  - "real-world"
-  - "software-engineering"
-  - "bug-detection"
-  - "security"
+description: "Code Review OpenEnv - Train AI agents to review code"
 
 action_schema:
-  type: "object"
+  type: object
   properties:
     action_type:
-      type: "string"
+      type: string
       enum:
         - "report_bug"
         - "request_change"
         - "approve"
         - "skip_line"
-      description: "Type of action the agent is taking"
     line_number:
-      type: "integer"
-      description: "Line number in code (0-indexed)"
+      type: integer
     bug_description:
-      type: "string"
-      description: "Description of the bug found"
+      type: string
     severity:
-      type: "string"
+      type: string
       enum:
         - "critical"
         - "high"
         - "medium"
         - "low"
-      description: "Severity level of the reported bug"
     suggestion:
-      type: "string"
-      description: "Suggested fix or improvement"
+      type: string
   required:
     - "action_type"
 
 observation_schema:
-  type: "object"
+  type: object
   properties:
     code_lines:
-      type: "array"
-      items:
-        type: "string"
-      description: "List of code lines with line numbers"
+      type: array
     current_line:
-      type: "integer"
-      description: "Current line number being reviewed"
+      type: integer
     bugs_found_so_far:
-      type: "object"
-      description: "Dictionary of bugs found so far"
+      type: object
     available_actions:
-      type: "array"
-      items:
-        type: "string"
-      description: "List of available actions"
+      type: array
     episode_progress:
-      type: "number"
-      minimum: 0.0
-      maximum: 1.0
-      description: "Progress through episode"
+      type: number
     task_type:
-      type: "string"
-      enum:
-        - "easy"
-        - "medium"
-        - "hard"
-      description: "Current task difficulty"
+      type: string
     code_summary:
-      type: "string"
-      description: "Brief description of what the code does"
+      type: string
 
 reward_schema:
-  type: "object"
+  type: object
   properties:
     score:
-      type: "number"
-      minimum: 0.0
-      maximum: 1.0
-      description: "Partial reward for this step"
+      type: number
     partial_progress:
-      type: "number"
-      minimum: 0.0
-      maximum: 1.0
-      description: "Progress towards task completion"
+      type: number
     done:
-      type: "boolean"
-      description: "Whether episode is complete"
+      type: boolean
     info:
-      type: "object"
-      description: "Additional information about this step"
+      type: object
 
 tasks:
   - id: "easy"
     name: "Syntax Error Detection"
-    description: "Detect obvious syntax errors in Python code"
-    difficulty: 1
-    max_steps: 30
-    expected_score_range:
-      - 0.0
-      - 1.0
-    grader: "EasyGrader"
-    success_criteria: "Successfully identify all syntax errors with minimal false positives"
+    description: "Detect syntax errors in Python code"
 
   - id: "medium"
     name: "Style & Performance Review"
-    description: "Identify style violations and performance issues in code"
-    difficulty: 2
-    max_steps: 50
-    expected_score_range:
-      - 0.0
-      - 1.0
-    grader: "MediumGrader"
-    success_criteria: "Identify code style issues and performance problems with correct severity classification"
+    description: "Identify style and performance issues"
 
   - id: "hard"
     name: "Security Vulnerability Detection"
-    description: "Identify critical security vulnerabilities and design flaws"
-    difficulty: 3
-    max_steps: 80
-    expected_score_range:
-      - 0.0
-      - 1.0
-    grader: "HardGrader"
-    success_criteria: "Find security vulnerabilities and design flaws with minimal false positives"
-
-reward_function:
-  type: "partial_progress"
-  description: "Rewards given throughout episode for correct bug reports"
-  signal_timing: "continuous"
-  sparsity: "medium"
-
-episode_config:
-  max_steps: 100
-  episode_boundaries: "fixed"
-  reset_behavior: "deterministic"
-
-environment_info:
-  python_version: "3.9+"
-  framework: "pydantic"
-  dependencies:
-    - pydantic
-    - openai
-    - flask
-
-validation:
-  schema_validation: true
-  determinism: true
-  reproducibility: true
+    description: "Find security vulnerabilities"

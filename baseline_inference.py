@@ -2,6 +2,7 @@
 """
 Baseline inference script for Code Review OpenEnv
 Uses OpenAI API to run a model against the environment
+MANDATORY: Uses API_BASE_URL, MODEL_NAME, HF_TOKEN environment variables
 """
 
 import os
@@ -10,8 +11,16 @@ import json
 from typing import Dict, List
 import time
 
+from openai import OpenAI
 from environment import CodeReviewEnv, Action
 from tasks import grade_episode, TASKS
+
+# MANDATORY: Get environment variables
+API_BASE_URL = os.getenv("API_BASE_URL", "https://api.openai.com/v1")
+API_KEY = os.getenv("HF_TOKEN") or os.getenv("OPENAI_API_KEY")
+MODEL_NAME = os.getenv("MODEL_NAME", "gpt-3.5-turbo")
+
+DEBUG = True
 
 
 def create_system_prompt(task_type: str) -> str:
@@ -55,7 +64,7 @@ def parse_agent_response(response_text: str) -> dict:
     return {"action_type": "skip_line"}
 
 
-def run_episode(env: CodeReviewEnv, task_type: str, client, max_steps: int = 50) -> tuple[float, List[dict]]:
+def run_episode(env: CodeReviewEnv, task_type: str, client, max_steps: int = 50) -> tuple:
     """
     Run a single episode with the agent
     
@@ -99,7 +108,7 @@ What is your next action?"""
         
         try:
             response = client.chat.completions.create(
-                model="gpt-3.5-turbo",
+                model=MODEL_NAME,  # ✅ Uses environment variable
                 messages=[{"role": "system", "content": system_prompt}] + conversation_history,
                 temperature=0.7,
                 max_tokens=200
@@ -150,19 +159,24 @@ What is your next action?"""
 def main():
     """Main baseline script"""
     
-    # Get API key
-    api_key = os.getenv("OPENAI_API_KEY")
-    if not api_key:
-        print("Error: OPENAI_API_KEY not set", file=sys.stderr)
+    # Validate API key
+    if not API_KEY:
+        print("Error: OPENAI_API_KEY or HF_TOKEN not set", file=sys.stderr)
         sys.exit(1)
     
-    # Import OpenAI client
+    if DEBUG:
+        print(f"Using Model: {MODEL_NAME}")
+        print(f"Using API Base URL: {API_BASE_URL}")
+        print()
+    
+    # Create OpenAI client with environment variables
     try:
-        from openai import OpenAI
-        client = OpenAI(api_key=api_key)
-    except ImportError:
-        print("Error: openai package not installed", file=sys.stderr)
-        print("Install with: pip install openai", file=sys.stderr)
+        client = OpenAI(
+            api_key=API_KEY,
+            base_url=API_BASE_URL
+        )
+    except Exception as e:
+        print(f"Error creating OpenAI client: {e}", file=sys.stderr)
         sys.exit(1)
     
     # Initialize environment
@@ -172,6 +186,8 @@ def main():
     results = {}
     print("=" * 60)
     print("CODE REVIEW OPENENV - BASELINE INFERENCE")
+    print(f"Model: {MODEL_NAME}")
+    print(f"API Base URL: {API_BASE_URL}")
     print("=" * 60)
     
     for task_type in ["easy", "medium", "hard"]:
@@ -218,7 +234,8 @@ def main():
     
     # Save results
     output = {
-        "model": "gpt-3.5-turbo",
+        "model": MODEL_NAME,
+        "api_base_url": API_BASE_URL,
         "timestamp": time.time(),
         "results": results,
         "overall_score": overall_score
