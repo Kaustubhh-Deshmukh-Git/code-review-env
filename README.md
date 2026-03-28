@@ -4,7 +4,7 @@ emoji: 🔍
 colorFrom: blue
 colorTo: green
 sdk: docker
-pinned: falsegit
+pinned: false
 ---
 # Code Review OpenEnv
 
