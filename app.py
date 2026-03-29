@@ -52,11 +52,13 @@ def reset():
     
     current_task = task_type
     obs = env.reset(task_type=task_type)
+    state = env.state()
     
     return jsonify({
+        "state": state,
         "observation": obs.dict(),
-        "task_type": current_task,
-        "status": "reset"
+        "info": {},
+        "task_type": current_task
     }), 200
 
 
