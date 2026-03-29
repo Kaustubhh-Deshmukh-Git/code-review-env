@@ -1,19 +1,17 @@
----
+﻿---
 title: Code Review OpenEnv
 emoji: 🔍
 colorFrom: blue
 colorTo: green
 sdk: docker
-pinned: falsegit
+pinned: false
 ---
 # Code Review OpenEnv
-
 **An OpenEnv environment for training AI agents to review code and identify bugs, security vulnerabilities, and style issues.**
-
 ---
-
 ## Overview
-
+Code Review is a real-world task simulation environment where AI agents learn to review Python code and identify issues across multiple difficulty levels. This environment models the actual process that developers perform during code review: reading code, identifying problems, and categorizing their severity.
+### Why This Problem?
 Code Review is a real-world task simulation environment where AI agents learn to review Python code and identify issues across multiple difficulty levels. This environment models the actual process that developers perform during code review: reading code, identifying problems, and categorizing their severity.
 
 ### Why This Problem?
@@ -27,12 +25,12 @@ Code Review is a real-world task simulation environment where AI agents learn to
 
 ## Features
 
-✅ **3 Difficulty Levels**: Easy (syntax) → Medium (style/performance) → Hard (security)  
-✅ **Deterministic Graders**: Fair scoring based on precision/recall metrics  
-✅ **Partial Reward Signals**: Agents get feedback throughout the episode  
-✅ **Real Code Patterns**: Includes actual bugs from real-world codebases  
-✅ **Full OpenEnv Spec**: Complete Pydantic models, typed interfaces  
-✅ **Dockerfile + HF Spaces Ready**: Deploy in minutes  
+âœ… **3 Difficulty Levels**: Easy (syntax) â†’ Medium (style/performance) â†’ Hard (security)  
+âœ… **Deterministic Graders**: Fair scoring based on precision/recall metrics  
+âœ… **Partial Reward Signals**: Agents get feedback throughout the episode  
+âœ… **Real Code Patterns**: Includes actual bugs from real-world codebases  
+âœ… **Full OpenEnv Spec**: Complete Pydantic models, typed interfaces  
+âœ… **Dockerfile + HF Spaces Ready**: Deploy in minutes  
 
 ---
 
@@ -96,10 +94,10 @@ Agents receive observations with:
 ### Reward Function
 
 **During Episode (Partial Signals)**:
-- ✅ Correct bug report: **+0.30**
-- ✅ Correct severity classification: **+0.10**
-- ❌ False positive (bug reported but doesn't exist): **-0.15**
-- ↷ Skip line or request change: **+0.01**
+- âœ… Correct bug report: **+0.30**
+- âœ… Correct severity classification: **+0.10**
+- âŒ False positive (bug reported but doesn't exist): **-0.15**
+- â†· Skip line or request change: **+0.01**
 
 **Final Score** (when `approve` or max steps reached):
 - Calculated using **precision/recall or weighted F1** depending on task
@@ -109,7 +107,7 @@ Agents receive observations with:
 
 ## Tasks & Difficulty Levels
 
-### Task 1: Syntax Error Detection (EASY) ⭐
+### Task 1: Syntax Error Detection (EASY) â­
 
 **Difficulty**: 1/3  
 **Max Steps**: 30  
@@ -130,14 +128,14 @@ Agents receive observations with:
 ```python
 def calculate_sum(numbers):
     total = 0
-    for num in numbers          # ❌ Missing colon
+    for num in numbers          # âŒ Missing colon
         total = total + num
     return total
 ```
 
 ---
 
-### Task 2: Style & Performance Issues (MEDIUM) ⭐⭐
+### Task 2: Style & Performance Issues (MEDIUM) â­â­
 
 **Difficulty**: 2/3  
 **Max Steps**: 50  
@@ -160,14 +158,14 @@ def calculate_sum(numbers):
 def process_data(data):
     result = []
     for i in range(len(data)):
-        if data[i] != None:      # ⚠️ Style: use 'is not None'
-            result.append(data[i] * 2)  # ⚠️ Performance: use list comp
+        if data[i] != None:      # âš ï¸ Style: use 'is not None'
+            result.append(data[i] * 2)  # âš ï¸ Performance: use list comp
     return result
 ```
 
 ---
 
-### Task 3: Security Vulnerabilities (HARD) ⭐⭐⭐
+### Task 3: Security Vulnerabilities (HARD) â­â­â­
 
 **Difficulty**: 3/3  
 **Max Steps**: 80  
@@ -188,15 +186,15 @@ def process_data(data):
 **Sample Code**:
 ```python
 def database_query(table, where_clause):
-    # ❌ CRITICAL: SQL Injection
+    # âŒ CRITICAL: SQL Injection
     query = "SELECT * FROM " + table + " WHERE " + where_clause
     result = execute_query(query)
     return result
 
 def cache_results(user_id):
-    global cache_dict  # ❌ CRITICAL: Global mutation
+    global cache_dict  # âŒ CRITICAL: Global mutation
     if user_id not in cache_dict:
-        # ❌ CRITICAL: SQL injection here too
+        # âŒ CRITICAL: SQL injection here too
         cache_dict[user_id] = database_query("users", "id=" + str(user_id))
     return cache_dict[user_id]
 ```
@@ -222,7 +220,7 @@ def cache_results(user_id):
 - **Metric**: Weighted F1 Score
 - **Weights**: Critical (0.50) > High (0.30) > Medium (0.15)
 - **Emphasis**: Finding critical vulnerabilities is more important than medium bugs
-- **Example**: 2 critical bugs found (0.50 × 2) vs 5 medium bugs (0.15 × 5)
+- **Example**: 2 critical bugs found (0.50 Ã— 2) vs 5 medium bugs (0.15 Ã— 5)
   - Path 1: 1.0 weighted
   - Path 2: 0.75 weighted
 
@@ -382,15 +380,15 @@ Run 3 episodes per task with gpt-3.5-turbo:
 
 ```
 code-review-env/
-├── environment.py          # Core CodeReviewEnv class
-├── tasks.py               # Task definitions and graders
-├── baseline_inference.py  # OpenAI baseline script
-├── app.py                 # Flask API server
-├── openenv.yaml           # OpenEnv specification
-├── requirements.txt       # Python dependencies
-├── Dockerfile             # Container configuration
-├── README.md              # This file
-└── baseline_results.json  # Sample baseline output
+â”œâ”€â”€ environment.py          # Core CodeReviewEnv class
+â”œâ”€â”€ tasks.py               # Task definitions and graders
+â”œâ”€â”€ baseline_inference.py  # OpenAI baseline script
+â”œâ”€â”€ app.py                 # Flask API server
+â”œâ”€â”€ openenv.yaml           # OpenEnv specification
+â”œâ”€â”€ requirements.txt       # Python dependencies
+â”œâ”€â”€ Dockerfile             # Container configuration
+â”œâ”€â”€ README.md              # This file
+â””â”€â”€ baseline_results.json  # Sample baseline output
 ```
 
 ---
@@ -562,7 +560,7 @@ python app.py --port 8000
 
 Contributions welcome! To add new code snippets:
 
-1. Edit `environment.py` → `self.code_snippets` dict
+1. Edit `environment.py` â†’ `self.code_snippets` dict
 2. Add ground truth bugs with severity levels
 3. Update graders if needed
 4. Test with baseline script
@@ -587,5 +585,5 @@ OpenEnv Hackathon 2026
 ## Support
 
 Questions? Open an issue on GitHub or contact:
-- 📧 kaustubh.d365@gmail.com
-- 💬 Discord: OpenEnv Hackathon Community
+- ðŸ“§ kaustubh.d365@gmail.com
+- ðŸ’¬ Discord: OpenEnv Hackathon Community
